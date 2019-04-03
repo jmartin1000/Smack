@@ -13,7 +13,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun loginLoginButtonClicked(view: View) {
-
     }
 
     fun loginCreateUserButtonClicked(view: View) {
