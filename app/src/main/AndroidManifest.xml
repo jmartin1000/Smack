@@ -9,7 +9,7 @@
             android:label="@string/app_name"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".Controller.CreateUseActivity">
+        <activity android:name=".Controller.CreateUserActivity">
         </activity>
         <activity android:name=".Controller.LoginActivity">
         </activity>
