@@ -72,24 +72,27 @@ class CreateUserActivity : AppCompatActivity() {
                                     LocalBroadcastManager.getInstance(this).sendBroadcast(userDataChange)
                                     enableSpinner(false)
                                     finish()
-                            } else errorToast()
+                            } else {
+                                    errorToast()
+                                }
                             }
-                        } else errorToast()
+                        } else {
+                            errorToast()
+                        }
                     }
-                } else errorToast()
+                } else {
+                    errorToast()
+                }
             }
         } else {
             Toast.makeText(this, "Make sure name, email, and password are all filled in", Toast.LENGTH_LONG).show()
             enableSpinner(false)
         }
-
-
     }
 
     fun errorToast() {
         Toast.makeText(this, "Something went wrong. Please try again", Toast.LENGTH_LONG).show()
         enableSpinner(false)
-
     }
 
     fun enableSpinner(enable: Boolean) {
