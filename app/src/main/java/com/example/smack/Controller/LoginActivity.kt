@@ -4,16 +4,43 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import com.example.smack.R
+import com.example.smack.Services.AuthService
+import kotlinx.android.synthetic.main.activity_create_user.*
+import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        loginSpinner.visibility = View.INVISIBLE
     }
 
     fun loginLoginButtonClicked(view: View) {
+        enableSpinner(true)
+        val email = loginEmailText.text.toString()
+        val password = loginPasswordText.text.toString()
+
+        if (email.isNotEmpty() && password.isNotEmpty()) {
+            AuthService.loginUser(this, email, password) { loginSuccess ->
+                if (loginSuccess) {
+                    AuthService.findUserByEmail(this) {findSuccess ->
+                        if (findSuccess) {
+                            enableSpinner(false)
+                            finish()
+                        } else {
+                            errorToast()
+                        }
+                    }
+                } else {
+                    errorToast()
+                }
+            }
+        } else {
+            Toast.makeText(this, "Please fill in both email and password", Toast.LENGTH_LONG).show()
+        }
     }
 
     fun loginCreateUserButtonClicked(view: View) {
@@ -21,4 +48,21 @@ class LoginActivity : AppCompatActivity() {
         startActivity(createUserIntent)
         finish()
     }
+
+    fun errorToast() {
+        Toast.makeText(this, "Something went wrong. Please try again", Toast.LENGTH_LONG).show()
+        enableSpinner(false)
+    }
+
+    fun enableSpinner(enable: Boolean) {
+        if (enable) {
+            loginSpinner.visibility = View.VISIBLE
+        } else {
+            loginSpinner.visibility = View.INVISIBLE
+        }
+        loginLoginButton.isEnabled = !enable
+        loginCreateUserButton.isEnabled = !enable
+    }
+
+    
 }
