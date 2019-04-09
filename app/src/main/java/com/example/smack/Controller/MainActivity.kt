@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                 nav_drawer_header_include.userImageNavHeader.setBackgroundColor(UserDataService.returnAvatarColor(UserDataService.avatarColor))
                 nav_drawer_header_include.loginButtonNavHeader.text = "Logout"
 
-                MessageService.getChannels(context) {complete ->
+                MessageService.getChannels {complete ->
                     if (complete) {
                         channelAdapter.notifyDataSetChanged()
                     }
