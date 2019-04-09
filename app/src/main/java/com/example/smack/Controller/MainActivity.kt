@@ -15,12 +15,16 @@ import com.example.smack.R
 import com.example.smack.Services.AuthService
 import com.example.smack.Services.UserDataService
 import com.example.smack.Utilities.BROADCAST_USER_DATA_CHANGE
+import com.example.smack.Utilities.SOCKET_URL
+import io.socket.client.IO
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 
 class MainActivity : AppCompatActivity() {
+
+    val socket = IO.socket(SOCKET_URL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,12 +36,21 @@ class MainActivity : AppCompatActivity() {
         )
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-        hideKeyboard()
 
+    }
+
+    override fun onResume() {
+        super.onResume()
         LocalBroadcastManager.getInstance(this).registerReceiver(
             userDataChangeReceiver,
             IntentFilter(BROADCAST_USER_DATA_CHANGE)
         )
+        socket.connect()
+    }
+
+    override fun onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        super.onPause()
     }
 
     private val userDataChangeReceiver = object : BroadcastReceiver() {
@@ -96,12 +109,12 @@ class MainActivity : AppCompatActivity() {
                     val channelName = nameTextField.text.toString()
                     val channelDesc = descTextField.text.toString()
 
-                    // create channel with name and description
-                    hideKeyboard()
+                    socket.emit("newChannel", channelName, channelDesc)
+
                 }
                 .setNegativeButton("Cancel") { dialog: DialogInterface?, which: Int ->
                     //cancel and close
-                    hideKeyboard()
+
                 }
                 .show()
         }
@@ -109,7 +122,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun sendMessageButtonClicked(view: View) {
-
+        hideKeyboard()
     }
 
     fun hideKeyboard() {
@@ -118,5 +131,10 @@ class MainActivity : AppCompatActivity() {
         if (inputManager.isAcceptingText) {
             inputManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
         }
+    }
+
+    override fun onDestroy() {
+        socket.disconnect()
+        super.onDestroy()
     }
 }
