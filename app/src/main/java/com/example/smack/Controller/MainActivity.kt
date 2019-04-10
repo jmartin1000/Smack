@@ -8,10 +8,12 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import com.example.smack.Adapters.MessageAdapter
 import com.example.smack.Model.Channel
 import com.example.smack.Model.Message
 import com.example.smack.R
@@ -32,10 +34,16 @@ class MainActivity : AppCompatActivity() {
     val socket = IO.socket(SOCKET_URL)
     lateinit var channelAdapter: ArrayAdapter<Channel>
     var selectedChannel : Channel? = null
+    lateinit var messageAdapter: MessageAdapter
 
     private fun setUpAdapters() {
         channelAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
         channel_list.adapter = channelAdapter
+
+        messageAdapter = MessageAdapter(this, MessageService.messages)
+        messageListView.adapter = messageAdapter
+        val layoutManager = LinearLayoutManager(this)
+        messageListView.layoutManager = layoutManager
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,13 +108,12 @@ class MainActivity : AppCompatActivity() {
 
     fun updateWithChannel() {
         mainChannelName.text = "#${selectedChannel?.name}"
-        println("alert: updateWithChannel initiated")
         if (selectedChannel != null) {
             MessageService.getMessages(selectedChannel!!.id) { complete ->
-                println("alert: MessageService.getMessages initiated")
                 if (complete) {
-                    for (message in MessageService.messages) {
-                        println("message: ${message.messageBody}")
+                    messageAdapter.notifyDataSetChanged()
+                    if (messageAdapter.itemCount > 0) {
+                        messageListView.smoothScrollToPosition(messageAdapter.itemCount - 1)
                     }
                 }
 
@@ -127,6 +134,8 @@ class MainActivity : AppCompatActivity() {
         if (App.prefs.isLoggedIn) {
 
             UserDataService.logout()
+            channelAdapter.notifyDataSetChanged()
+            messageAdapter.notifyDataSetChanged()
             nav_drawer_header_include.userNameNavHeader.text = ""
             nav_drawer_header_include.userEmailNavHeader.text = ""
             nav_drawer_header_include.userImageNavHeader.setImageResource(R.drawable.profiledefault)
@@ -192,6 +201,8 @@ class MainActivity : AppCompatActivity() {
 
                     val newMessage = Message(messageBody, userName, channelId, userAvatar, userAvatarColor, id, timeStamp)
                     MessageService.messages.add(newMessage)
+                    messageAdapter.notifyDataSetChanged()
+                    messageListView.smoothScrollToPosition(messageAdapter.itemCount - 1)
                 }
             }
         }
